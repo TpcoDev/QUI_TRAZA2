@@ -1,0 +1,7 @@
+*.pyc
+*.zip
+*.rar
+.vscode
+__pycache__
+virtual_odoo12
+*.swp
