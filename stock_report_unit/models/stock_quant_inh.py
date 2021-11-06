@@ -23,7 +23,7 @@ class StockQuant(models.Model):
     @api.depends('quantity')
     def compute_cant(self):
         for record in self:
-            self.cant=record.inventory_quantity/record.product_uom_id.factor
+            record.cant=record.inventory_quantity/record.product_uom_id.factor
 
     @api.depends('product_id')
     def compute_unit(self):
