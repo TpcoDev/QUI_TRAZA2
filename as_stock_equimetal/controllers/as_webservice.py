@@ -48,8 +48,9 @@ class AsWebserviceController(http.Controller):
                     ('unidad_sap', '=', post['params']['uomId'])], limit=1)
                 if not uomID:
                     uomID = request.env['uom.uom'].sudo().create({
-                        'name': f"{post['params']['itemDescription']} {post['params']['contenidoEnvase']}",
+                        'name': f"{post['params']['itemDescription']} ({post['params']['uomId']}) {post['params']['contenidoEnvase']}",
                         'as_contenido_envase': post['params']['contenidoEnvase'],
+                        'unidad_sap': post['params']['uomId'],
                         'category_id': 2 if post['params']['unidadReferencia'] == 'KG' else 5,
                         'factor': (1 / post['params']['contenidoEnvase']) if post['params'][
                                                                                  'contenidoEnvase'] > 0 else 1,
@@ -60,8 +61,9 @@ class AsWebserviceController(http.Controller):
                                                                limit=1)
                 if not uomPOID:
                     uomPOID = request.env['uom.uom'].sudo().create({
-                        'name': f"{post['params']['itemDescription']} {post['params']['contenidoEnvase']}",
+                        'name': f"{post['params']['itemDescription']} ({post['params']['uomId']}) {post['params']['contenidoEnvase']}",
                         'as_contenido_envase': post['params']['contenidoEnvase'],
+                        'unidad_sap': post['params']['uomId'],
                         'category_id': 2 if post['params']['unidadReferencia'] == 'KG' else 5,
                         'factor': (1 / post['params']['contenidoEnvase']) if post['params'][
                                                                                  'contenidoEnvase'] > 0 else 1,
