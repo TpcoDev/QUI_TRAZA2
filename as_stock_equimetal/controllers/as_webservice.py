@@ -44,14 +44,29 @@ class AsWebserviceController(http.Controller):
                 # estructura = self.get_file('ws016.json')
                 # es_valido = self.validar_json(post, esquema=estructura)
                 # es_valido = True
-                uomID = request.env['uom.uom'].sudo().search([('unidad_sap', '=', post['params']['uomId'])], limit=1)
+                uomID = request.env['uom.uom'].sudo().search([
+                    ('unidad_sap', '=', post['params']['uomId'])], limit=1)
                 if not uomID:
-                    uomID = request.env.ref('uom.product_uom_unit')
+                    uomID = request.env['uom.uom'].sudo().create({
+                        'name': f"{post['params']['itemDescription']} {post['params']['contenidoEnvase']}",
+                        'as_contenido_envase': post['params']['contenidoEnvase'],
+                        'category_id': 2 if post['params']['unidadReferencia'] == 'KG' else 5,
+                        'factor': (1 / post['params']['contenidoEnvase']) if post['params'][
+                                                                                 'contenidoEnvase'] > 0 else 1,
+                        'uom_type': 'bigger' if post['params']['contenidoEnvase'] > 1 else 'smaller'
+                    })
 
                 uomPOID = request.env['uom.uom'].sudo().search([('unidad_sap', '=', post['params']['uomPoId'])],
                                                                limit=1)
                 if not uomPOID:
-                    uomPOID = request.env.ref('uom.product_uom_unit')
+                    uomPOID = request.env['uom.uom'].sudo().create({
+                        'name': f"{post['params']['itemDescription']} {post['params']['contenidoEnvase']}",
+                        'as_contenido_envase': post['params']['contenidoEnvase'],
+                        'category_id': 2 if post['params']['unidadReferencia'] == 'KG' else 5,
+                        'factor': (1 / post['params']['contenidoEnvase']) if post['params'][
+                                                                                 'contenidoEnvase'] > 0 else 1,
+                        'uom_type': 'bigger' if post['params']['contenidoEnvase'] > 1 else 'smaller'
+                    })
 
                 envases_id = request.env['quimetal.envases'].sudo().search(
                     [('cod_envase', '=', post['params']['envase'])], limit=1)
@@ -96,8 +111,14 @@ class AsWebserviceController(http.Controller):
 
                 product_id = request.env['product.template'].sudo().search([('id', '=', post['id'])], limit=1)
                 if product_id:
-                    product_id.write(vals)
-                    mensaje_correcto['result']['RespMessage'] = 'Producto se actualizó'
+                    sale_line = request.env['sale.order.line'].search([('product_id', '=', product_id.id)])
+                    purchase_line = request.env['purchase.order.line'].search([('product_id', '=', product_id.id)])
+                    stock_line = request.env['stock.move.line'].search([('product_id', '=', product_id.id)])
+
+                    if not sale_line and not purchase_line and not stock_line:
+                        product_id.write(vals)
+                        mensaje_correcto['result']['RespMessage'] = 'Producto se actualizó'
+                    mensaje_correcto['result']['RespMessage'] = 'Producto no se actualizó, porque se han hecho trasacciones'
                     return mensaje_correcto
                 else:
                     product_id = request.env['product.template'].sudo().create(vals)

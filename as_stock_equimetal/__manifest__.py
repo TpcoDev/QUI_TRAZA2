@@ -10,7 +10,7 @@ stock equimetal
 Custom module for Latproject
     """,
     'category': "Stock",
-    'depends': ["base", "stock", 'base_setup', 'l10n_cl'],
+    'depends': ["base", "sale", "purchase", "stock", 'base_setup', 'l10n_cl'],
     'website': 'http://www.ahorasoft.com',
     'data': [
         'wizard/as_menu.xml',
@@ -23,6 +23,7 @@ Custom module for Latproject
         'views/as_modelos.xml',
         'views/as_res_config.xml',
         'views/as_stock_location.xml',
+        'views/uom.xml',
         'security/ir.model.access.csv',
     ],
     'demo': [],
