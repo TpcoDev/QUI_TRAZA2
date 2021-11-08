@@ -16,22 +16,15 @@ class StockQuant(models.Model):
     _inherit = 'stock.quant'
 
     # unit_ref
-    unit_ref = fields.Char(string='Unit.',compute="compute_unit")
-    cant = fields.Float(string='Cant.',required=False,compute="compute_cant")
-
+    unit_ref = fields.Char(compute='compute_unit', string='Unit.')
+    cant = fields.Float(string='Cant.', required=False, compute="compute_cant")
 
     @api.depends('quantity')
     def compute_cant(self):
         for record in self:
-            record.cant=record.inventory_quantity/record.product_uom_id.factor
+            record.cant = record.inventory_quantity / record.product_uom_id.factor
 
     @api.depends('product_id')
     def compute_unit(self):
-        uom_all= self.env['uom.uom'].search([])
         for record in self:
-            oum_obj=uom_all.filtered(lambda uo: uo.id==record.product_uom_id.id and uo.uom_type=="reference")
-            record.unit_ref=oum_obj.name
-
-
-
-
+            record.unit_ref = record.product_id.product_tmpl_id.unidad_referencia.name
