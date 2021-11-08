@@ -19,7 +19,6 @@ class StockQuant(models.Model):
     unit_ref = fields.Char(compute='compute_unit', string='Unit.')
     cant = fields.Float(string='Cant.', required=False, compute="compute_cant")
 
-    @api.depends('quantity')
     def compute_cant(self):
         for record in self:
             record.cant = record.inventory_quantity / record.product_uom_id.factor
