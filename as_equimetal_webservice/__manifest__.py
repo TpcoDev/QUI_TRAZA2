@@ -26,7 +26,10 @@ Custom module for Latproject
         'views/as_res_config.xml',
         'views/as_sale_order.xml',
         'views/stock_picking_views.xml',
-        'views/product_views.xml'
+        'views/product_views.xml',
+        'views/as_modelos.xml',
+        'views/as_campos_x.xml',
+        'views/uom.xml'
     ],
     'demo': [],
     'installable': True,
