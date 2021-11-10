@@ -900,9 +900,13 @@ class as_webservice_quimetal(http.Controller):
             "RespMessage": "Error de conexión"
         }
         mensaje_correcto = {
-            "Token": as_token,
-            "RespCode": 0,
-            "RespMessage": "Producto se agregó correctamente"
+            "jsonrpc": "2.0",
+            "id": post['id'],
+            "result": {
+                "Token": as_token,
+                "RespCode": 0,
+                "RespMessage": "Producto se agregó correctamente"
+            }
         }
 
         try:
