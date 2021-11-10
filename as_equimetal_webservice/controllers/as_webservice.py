@@ -900,13 +900,9 @@ class as_webservice_quimetal(http.Controller):
             "RespMessage": "Error de conexión"
         }
         mensaje_correcto = {
-            "jsonrpc": "2.0",
-            "id": post['id'],
-            "result": {
-                "Token": as_token,
-                "RespCode": 0,
-                "RespMessage": "Producto se agregó correctamente"
-            }
+            "Token": as_token,
+            "RespCode": 0,
+            "RespMessage": "Producto se agregó correctamente"
         }
 
         try:
@@ -1000,12 +996,11 @@ class as_webservice_quimetal(http.Controller):
 
                     if not sale_line and not purchase_line and not stock_line:
                         product_id.write(vals)
-                        mensaje_correcto['result']['RespMessage'] = 'Producto se actualizó'
+                        mensaje_correcto['RespMessage'] = 'Producto se actualizó'
                         self.create_message_log("WS017", as_token, mensaje_correcto, 'ACEPTADO',
                                                 'Producto actualizado')
                     else:
-                        mensaje_correcto['result'][
-                            'RespMessage'] = 'Producto no se actualizó, porque se han hecho trasacciones'
+                        mensaje_correcto['RespMessage'] = 'Producto no se actualizó, porque se han hecho trasacciones'
                         self.create_message_log("WS017", as_token, mensaje_correcto, 'RECHAZADO',
                                                 'Producto no se actualizó')
                     return mensaje_correcto
