@@ -1001,10 +1001,13 @@ class as_webservice_quimetal(http.Controller):
                     if not sale_line and not purchase_line and not stock_line:
                         product_id.write(vals)
                         mensaje_correcto['result']['RespMessage'] = 'Producto se actualizó'
-                    mensaje_correcto['result'][
-                        'RespMessage'] = 'Producto no se actualizó, porque se han hecho trasacciones'
-                    self.create_message_log("WS017", as_token, mensaje_correcto, 'RECHAZADO',
-                                            'Producto no se actualizó')
+                        self.create_message_log("WS017", as_token, mensaje_correcto, 'ACEPTADO',
+                                                'Producto actualizado')
+                    else:
+                        mensaje_correcto['result'][
+                            'RespMessage'] = 'Producto no se actualizó, porque se han hecho trasacciones'
+                        self.create_message_log("WS017", as_token, mensaje_correcto, 'RECHAZADO',
+                                                'Producto no se actualizó')
                     return mensaje_correcto
                 else:
                     product_id = request.env['product.template'].sudo().create(vals)
