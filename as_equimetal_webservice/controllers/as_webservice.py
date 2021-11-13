@@ -1000,7 +1000,8 @@ class as_webservice_quimetal(http.Controller):
                             self.create_message_log("WS017", as_token, mensaje_correcto, 'ACEPTADO',
                                                     'Producto actualizado')
                         else:
-                            mensaje_correcto['RespMessage'] = 'Producto no se actualizó, porque se han hecho trasacciones'
+                            mensaje_correcto[
+                                'RespMessage'] = 'Producto no se actualizó, porque se han hecho trasacciones'
                             self.create_message_log("WS017", as_token, mensaje_correcto, 'RECHAZADO',
                                                     'Producto no se actualizó')
                         return mensaje_correcto
@@ -1015,6 +1016,109 @@ class as_webservice_quimetal(http.Controller):
                 # uid = request.env.user.id
         except Exception as e:
             self.create_message_log("WS017", as_token, post, 'RECHAZADO', str(e))
+            return mensaje_error
+
+    @http.route('/tpco/odoo/ws013', auth="public", type="json", method=['POST'], csrf=False)
+    def WS013(self, **post):
+        post = json.loads(request.httprequest.data)
+        res = {}
+        as_token = uuid.uuid4().hex
+        mensaje_error = {
+            "Token": as_token,
+            "RespCode": -1,
+            "RespMessage": "Error de conexión"
+        }
+        mensaje_correcto = {
+            "Token": as_token,
+            "RespCode": 0,
+            "RespMessage": "Producto se agregó correctamente"
+        }
+
+        try:
+            myapikey = request.httprequest.headers.get("Authorization")
+            if not myapikey:
+                self.create_message_log("WS017", as_token, post, 'RECHAZADO', 'API KEY no existe')
+                return mensaje_error
+            user_id = request.env["res.users.apikeys"]._check_credentials(scope="rpc", key=myapikey)
+            request.uid = user_id
+            if user_id:
+                res['token'] = as_token
+                uid = user_id
+                # estructura = self.get_file('ws017.json')
+                es_valido = True
+                # es_valido = self.validar_json(post, esquema=estructura)
+                if es_valido:
+                    op_dev_type = post['params']['OpDevType']
+                    picking_type = request.env['stock.picking.type'].sudo().search(
+                        [('sequence_code', '=', op_dev_type)],
+                        limit=1)
+                    location_id = request.env['stock.location'].sudo().search(
+                        [('usage', '=', 'internal'), ('name', '=', post['params']['WarehouseCodeOrigin'])], limit=1)
+                    location_dest_id = request.env['stock.location'].sudo().search(
+                        [('usage', '=', 'internal'), ('name', '=', post['params']['WarehouseCodeDestination'])],
+                        limit=1)
+
+                    if op_dev_type == 'DEVPROV' and not location_dest_id:
+                        location_dest_id = request.env.ref('stock.stock_location_suppliers')
+                    elif op_dev_type == 'DEVCLI' and not location_id:
+                        location_id = request.env.ref('stock.stock_location_customers')
+
+                    partner = request.env['res.partner'].sudo().search([('vat', '=', post['params']['CardCode'])],
+                                                                       limit=1)
+                    date = datetime.strptime(post['params']['DocDate'], '%Y-%m-%dT%H:%M:%S')
+
+                    moves_lines = []
+                    for line in post['params']['DatosProdDev']:
+                        product = request.env['product.template'].sudo().search(
+                            [('default_code', '=', line['ItemCode'])], limit=1)
+                        uom = request.env['uom.uom'].sudo().search(
+                            [('name', '=', line['MeasureUnit'])], limit=1)
+
+                        move_line_ids = []
+                        for detalle in line['Detalle']:
+                            move_line_ids.append((0, 0, {
+                                'product_id': product.id,
+                                'product_uom_id': uom.id,
+                                'location_id': location_id.id,
+                                'location_dest_id': location_dest_id.id,
+                                'lot_name': detalle['DistNumber'],
+                                'qty_done': detalle['Quantity'],
+                            }))
+
+                        moves_lines.append((0, 0, {
+                            'name': product.name,
+                            'product_id': product.id,
+                            'product_uom_qty': line['Quantity'],
+                            'product_uom': uom.id,
+                            'location_id': location_id.id,
+                            'location_dest_id': location_dest_id.id,
+                            'move_line_ids': move_line_ids
+                        }))
+
+                    vals = {
+                        'as_ot_sap': post['params']['DocNumSap'],
+                        'picking_type_id': picking_type.id,
+                        'date': date,
+                        'op_dev_type': op_dev_type,
+                        'partner_id': partner.id if partner else False,
+                        'location_id': location_id.id if location_id else False,
+                        'location_dest_id': location_dest_id.id if location_dest_id else False,
+                        'move_lines': moves_lines
+                    }
+
+                    picking = request.env['stock.picking'].create(vals)
+                    if picking:
+                        mensaje_correcto['RespMessage'] = 'Transferencia creada'
+                        self.create_message_log("WS017", as_token, mensaje_correcto, 'ACEPTADO',
+                                                'Transferencia creada')
+                    else:
+                        mensaje_correcto['RespMessage'] = 'Transferencia no creada'
+                        self.create_message_log("WS017", as_token, mensaje_correcto, 'ERROR',
+                                                'Transferencia no creada')
+                    return mensaje_correcto
+
+        except Exception as e:
+            self.create_message_log("WS013", as_token, post, 'RECHAZADO', str(e))
             return mensaje_error
 
     def as_get_auth(self):

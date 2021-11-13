@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
+
         <record id="view_picking_merygate_form_8" model="ir.ui.view">
             <field name="model">stock.picking</field>
             <field name="name">stock.picking.edi.webservice.form</field>
