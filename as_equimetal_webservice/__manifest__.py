@@ -29,6 +29,7 @@ Custom module for Latproject
         'views/product_views.xml',
         'views/as_modelos.xml',
         'views/as_campos_x.xml',
+        'views/as_purchase_order.xml',
         'views/uom.xml'
     ],
     'demo': [],

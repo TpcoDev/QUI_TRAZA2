@@ -1116,9 +1116,70 @@ class as_webservice_quimetal(http.Controller):
                         self.create_message_log("WS017", as_token, mensaje_correcto, 'ERROR',
                                                 'Transferencia no creada')
                     return mensaje_correcto
+                else:
+                    self.create_message_log("WS013", as_token, post, 'RECHAZADO', 'Estructura del Json Invalida')
+                    return mensaje_error
 
         except Exception as e:
             self.create_message_log("WS013", as_token, post, 'RECHAZADO', str(e))
+            return mensaje_error
+
+    @http.route('/tpco/odoo/ws015', auth="public", type="json", method=['POST'], csrf=False)
+    def WS015(self, **post):
+        post = json.loads(request.httprequest.data)
+        res = {}
+        as_token = uuid.uuid4().hex
+        mensaje_error = {
+            "Token": as_token,
+            "RespCode": -1,
+            "RespMessage": "Error de conexión"
+        }
+        mensaje_correcto = {
+            "Token": as_token,
+            "RespCode": 0,
+            "RespMessage": "Producto se agregó correctamente"
+        }
+
+        try:
+            myapikey = request.httprequest.headers.get("Authorization")
+            if not myapikey:
+                self.create_message_log("WS015", as_token, post, 'RECHAZADO', 'API KEY no existe')
+                return mensaje_error
+            user_id = request.env["res.users.apikeys"]._check_credentials(scope="rpc", key=myapikey)
+            request.uid = user_id
+            if user_id:
+                res['token'] = as_token
+                uid = user_id
+                # estructura = self.get_file('ws017.json')
+                es_valido = True
+                # es_valido = self.validar_json(post, esquema=estructura)
+                if es_valido:
+                    doc_type = post['params']['DocType']
+                    model = 'purchase.order' if doc_type == 'OC' else 'sale.order'
+                    object_model = request.env[model].search([('name', '=', post['params']['DocNum'])], limit=1)
+                    if object_model:
+                        object_model.write({
+                            'f_closed': False if post['params']['flagClosed'] else True
+                        })
+                        if post['params']['flagClosed']:
+                            mensaje_correcto['RespMessage'] = f"La OC {post['params']['DocNum']} fue cerrada"
+                        else:
+                            mensaje_correcto['RespMessage'] = f"La OC {post['params']['DocNum']} fue abierta"
+
+                        self.create_message_log("WS015", as_token, mensaje_correcto, 'ACEPTADO',
+                                                'Orden de compra actualizada')
+                        return mensaje_correcto
+                    else:
+                        mensaje_error['RespMessage'] = f"La OC {post['params']['DocNum']} no existe"
+                        self.create_message_log("WS015", as_token, mensaje_error, 'ERROR',
+                                                'Orden de compra no existe')
+                        return mensaje_error
+                else:
+                    self.create_message_log("WS015", as_token, post, 'RECHAZADO', 'Estructura del Json Invalida')
+                    return mensaje_error
+
+        except Exception as e:
+            self.create_message_log("WS015", as_token, post, 'RECHAZADO', str(e))
             return mensaje_error
 
     def as_get_auth(self):

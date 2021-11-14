@@ -8,7 +8,8 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='partner_id']" position="after">
                     <field name="as_num_comex"/>
-                   
+                    <field name="f_closed" widget="boolean_toggle"/>
+
                 </xpath>       
                         
             </field>
