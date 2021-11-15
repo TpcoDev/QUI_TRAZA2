@@ -1085,9 +1085,9 @@ class as_webservice_quimetal(http.Controller):
             if user_id:
                 res['token'] = as_token
                 uid = user_id
-                # estructura = self.get_file('ws017.json')
-                es_valido = True
-                # es_valido = self.validar_json(post, esquema=estructura)
+                estructura = self.get_file('ws013.json')
+                # es_valido = True
+                es_valido = self.validar_json(post, esquema=estructura)
                 if es_valido:
                     op_dev_type = post['params']['OpDevType']
                     picking_type = request.env['stock.picking.type'].sudo().search(
@@ -1150,11 +1150,11 @@ class as_webservice_quimetal(http.Controller):
                     picking = request.env['stock.picking'].create(vals)
                     if picking:
                         mensaje_correcto['RespMessage'] = 'Transferencia creada'
-                        self.create_message_log("WS017", as_token, mensaje_correcto, 'ACEPTADO',
+                        self.create_message_log("WS013", as_token, mensaje_correcto, 'ACEPTADO',
                                                 'Transferencia creada')
                     else:
                         mensaje_correcto['RespMessage'] = 'Transferencia no creada'
-                        self.create_message_log("WS017", as_token, mensaje_correcto, 'ERROR',
+                        self.create_message_log("WS013", as_token, mensaje_correcto, 'ERROR',
                                                 'Transferencia no creada')
                     return mensaje_correcto
                 else:
@@ -1191,9 +1191,9 @@ class as_webservice_quimetal(http.Controller):
             if user_id:
                 res['token'] = as_token
                 uid = user_id
-                # estructura = self.get_file('ws017.json')
-                es_valido = True
-                # es_valido = self.validar_json(post, esquema=estructura)
+                estructura = self.get_file('ws015.json')
+                # es_valido = True
+                es_valido = self.validar_json(post, esquema=estructura)
                 if es_valido:
                     doc_type = post['params']['DocType']
                     model = 'purchase.order' if doc_type == 'OC' else 'sale.order'
