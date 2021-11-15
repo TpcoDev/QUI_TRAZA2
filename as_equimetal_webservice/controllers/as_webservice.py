@@ -72,30 +72,31 @@ class as_webservice_quimetal(http.Controller):
 
                 if es_valido:
                     # Tratamiento de cliente
-                    w_search = request.env["purchase.order"].sudo().search([('name', '=', post['DocNum'])], limit=1)
-                    if not w_search:
-                        cliente = request.env['res.partner']
-                        cliente_search = cliente.sudo().search([('vat', '=', post['CardCode'])], limit=1)
-                        if cliente_search.id:
-                            cliente_id = cliente_search.id
-                        else:
-                            cliente_nuevo = cliente.sudo().create(
-                                {
-                                    "name": post['CardName'],
-                                    "vat": post['CardCode'],
-                                    "l10n_latam_identification_type_id": 2,
-                                    "company_type": 'company',
-                                }
-                            )
-                            cliente_id = cliente_nuevo.id
+                    for linea in post["DatosProdOC"]:
+                        w_search = request.env["purchase.order"].sudo().search(
+                            [('name', '=', post['DocNum'] + '-' + str(linea['LineNum']))], limit=1)
+                        if not w_search:
+                            cliente = request.env['res.partner']
+                            cliente_search = cliente.sudo().search([('vat', '=', post['CardCode'])], limit=1)
+                            if cliente_search.id:
+                                cliente_id = cliente_search.id
+                            else:
+                                cliente_nuevo = cliente.sudo().create(
+                                    {
+                                        "name": post['CardName'],
+                                        "vat": post['CardCode'],
+                                        "l10n_latam_identification_type_id": 2,
+                                        "company_type": 'company',
+                                    }
+                                )
+                                cliente_id = cliente_nuevo.id
 
-                        # Orden de compra
-                        compra = request.env['purchase.order']
-                        date_order = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                        date_approve = post['DocDate'].replace("T", " ")[:-3]
+                            # Orden de compra
+                            compra = request.env['purchase.order']
+                            date_order = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                            date_approve = post['DocDate'].replace("T", " ")[:-3]
 
-                        compra_nueva_linea = []
-                        for linea in post["DatosProdOC"]:
+                            compra_nueva_linea = []
                             producto_uom = request.env['uom.uom']
                             producto_uom_search = producto_uom.sudo().search([('name', '=', linea['MeasureUnit'])])[0]
                             producto_uom_id = 0
@@ -148,45 +149,65 @@ class as_webservice_quimetal(http.Controller):
                                     "taxes_id": [[6, False, []]],
                                     "analytic_tag_ids": [
                                         [6, False, []]], })
-                        # request.env.cr.commit()
-                        _logger.debug("\n\n\n\n\ncompra_nueva_linea: %s", compra_nueva_linea)
+                            # request.env.cr.commit()
+                            _logger.debug("\n\n\n\n\ncompra_nueva_linea: %s", compra_nueva_linea)
 
-                        # Ensamblando la compra
-                        compra_nueva = {
-                            'name': post['DocNum'],
-                            'origin': post['DocNum'],
-                            'priority': '0',
-                            'partner_id': cliente_id,
-                            'partner_ref': False,
-                            'currency_id': 2,
-                            'date_order': date_order,
-                            'date_approve': date_approve,
-                            # 'date_planned': '2021-04-23 10:00:00', 
-                            'receipt_reminder_email': False,
-                            'reminder_date_before_receipt': 1,
-                            'notes': post['CardCode'],
-                            'user_id': uid,
-                            'company_id': 1,
-                            'payment_term_id': 7,
-                            'fiscal_position_id': False,
-                            'order_line': [(0, False, line) for line in compra_nueva_linea],
-                        }
+                            # Ensamblando la compra
+                            compra_nueva = {
+                                'name': post['DocNum'] + '-' + str(linea['LineNum']),
+                                'origin': post['DocNum'] + '-' + str(linea['LineNum']),
+                                'priority': '0',
+                                'partner_id': cliente_id,
+                                'partner_ref': False,
+                                'currency_id': 2,
+                                'date_order': date_order,
+                                'date_approve': date_approve,
+                                # 'date_planned': '2021-04-23 10:00:00',
+                                'receipt_reminder_email': False,
+                                'reminder_date_before_receipt': 1,
+                                'notes': post['CardCode'],
+                                'user_id': uid,
+                                'company_id': 1,
+                                'payment_term_id': 7,
+                                'fiscal_position_id': False,
+                                'order_line': [(0, False, line) for line in compra_nueva_linea],
+                            }
 
-                        nueva_compra = request.env['purchase.order'].sudo().create(compra_nueva)
-                        nueva_compra.button_confirm()
-                        self.create_message_log("ws001", as_token, post, 'ACEPTADO', 'OC recibidas correctamente')
-                        return mensaje_correcto
+                            nueva_compra = request.env['purchase.order'].sudo().create(compra_nueva)
+                            nueva_compra.button_confirm()
+                            self.create_message_log("ws001", as_token, post, 'ACEPTADO', 'OC recibidas correctamente')
+                            _logger.debug('\n\nCompra creada: ' + str(nueva_compra.name))
                     else:
+                        mensaje_error = {
+                            "Token": as_token,
+                            "RespCode": -2,
+                            "RespMessage": "Ya existe el registro que pretende almacenar"
+                        }
                         self.create_message_log("ws001", as_token, post, 'RECHAZADO',
                                                 'Ya existe el registro que pretende almacenar')
                         return mensaje_error
                 else:
+                    mensaje_error = {
+                        "Token": as_token,
+                        "RespCode": -3,
+                        "RespMessage": "Estructura del Json Invalida"
+                    }
                     self.create_message_log("ws001", as_token, post, 'RECHAZADO', 'Estructura del Json Invalida')
                     return mensaje_error
             else:
+                mensaje_error = {
+                    "Token": as_token,
+                    "RespCode": -4,
+                    "RespMessage": "Autenticación fallida"
+                }
                 self.create_message_log("ws001", as_token, post, 'RECHAZADO', 'Autenticación fallida')
                 return mensaje_error
         except Exception as e:
+            mensaje_error = {
+                "Token": as_token,
+                "RespCode": -99,
+                "RespMessage": str(e)
+            }
             self.create_message_log("ws001", as_token, post, 'RECHAZADO', str(e))
             return mensaje_error
 
@@ -385,6 +406,11 @@ class as_webservice_quimetal(http.Controller):
         try:
             myapikey = request.httprequest.headers.get("Authorization")
             if not myapikey:
+                mensaje_error = {
+                    "Token": as_token,
+                    "RespCode": -1,
+                    "RespMessage": "API KEY no existe"
+                }
                 self.create_message_log("ws023", as_token, post, 'RECHAZADO', 'API KEY no existe')
                 return mensaje_error
             user_id = request.env["res.users.apikeys"]._check_credentials(scope="rpc", key=myapikey)
@@ -473,13 +499,28 @@ class as_webservice_quimetal(http.Controller):
                             self.create_message_log("ws023", as_token, post, 'ACEPTADO', 'OT recibidas correctamente')
                             return mensaje_correcto
                         else:
+                            mensaje_error = {
+                                "Token": as_token,
+                                "RespCode": -2,
+                                "RespMessage": "Ya existe el registro que pretende almacenar"
+                            }
                             self.create_message_log("ws023", as_token, post, 'RECHAZADO',
                                                     'Ya existe el registro que pretende almacenar')
                             return mensaje_error
                 else:
+                    mensaje_error = {
+                        "Token": as_token,
+                        "RespCode": -3,
+                        "RespMessage": "Estructura del Json Invalida"
+                    }
                     self.create_message_log("ws023", as_token, post, 'RECHAZADO', 'Estructura del Json Invalida')
                     return mensaje_error
             else:
+                mensaje_error = {
+                    "Token": as_token,
+                    "RespCode": -4,
+                    "RespMessage": "Autenticación fallida"
+                }
                 self.create_message_log("ws023", as_token, post, 'RECHAZADO', 'Autenticación fallida')
                 return mensaje_error
         except Exception as e:
