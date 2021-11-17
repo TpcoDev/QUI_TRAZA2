@@ -449,7 +449,7 @@ class AsStockPicking(models.Model):
                             "distNumber": move_line.lot_id.name,
                             "quantity": move_line.qty_done_base,
                             "quantityOrig": move_line.qty_done,
-                            "dateProduction": str(move_line.lot_id.create_date.strftime('%Y-%m-%dT%H:%M:%S')),
+                            "dateAdmission": str(move_line.lot_id.create_date.strftime('%Y-%m-%dT%H:%M:%S')),
                         }
                         if move_line.lot_id.expiration_date:
                             vals_move_line['dateExpiration'] = str(
@@ -474,11 +474,6 @@ class AsStockPicking(models.Model):
                     }
                     picking_line.append(vals_picking_line)
             if webservice == 'WS005':
-                try:
-                    int(picking.origin)
-                except Exception as e:
-                    errores += '<b>* El origen-docNumSAP no puede tener letras solo Numeros</b><br/>'
-                    cont_errores += 1
                 if not picking.partner_id:
                     errores += '<b>* Cliente No seleccionado</b><br/>'
                     cont_errores += 1

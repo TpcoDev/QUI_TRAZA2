@@ -178,15 +178,16 @@ class as_webservice_quimetal(http.Controller):
                             nueva_compra.button_confirm()
                             self.create_message_log("ws001", as_token, post, 'ACEPTADO', 'OC recibidas correctamente')
                             _logger.debug('\n\nCompra creada: ' + str(nueva_compra.name))
-                    else:
-                        mensaje_error = {
-                            "Token": as_token,
-                            "RespCode": -2,
-                            "RespMessage": "Ya existe el registro que pretende almacenar"
-                        }
-                        self.create_message_log("ws001", as_token, post, 'RECHAZADO',
-                                                'Ya existe el registro que pretende almacenar')
-                        return mensaje_error
+                        else:
+                            mensaje_error = {
+                                "Token": as_token,
+                                "RespCode": -2,
+                                "RespMessage": "Ya existe el registro que pretende almacenar"
+                            }
+                            self.create_message_log("ws001", as_token, post, 'RECHAZADO',
+                                                    'Ya existe el registro que pretende almacenar')
+                            return mensaje_error
+                    return mensaje_correcto
                 else:
                     mensaje_error = {
                         "Token": as_token,
