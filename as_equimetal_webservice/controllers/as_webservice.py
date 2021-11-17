@@ -1163,6 +1163,7 @@ class as_webservice_quimetal(http.Controller):
                         mensaje_correcto['RespMessage'] = 'Transferencia creada'
                         self.create_message_log("WS013", as_token, mensaje_correcto, 'ACEPTADO',
                                                 'Transferencia creada')
+                        picking.button_validate()
                     else:
                         mensaje_correcto['RespMessage'] = 'Transferencia no creada'
                         self.create_message_log("WS013", as_token, mensaje_correcto, 'ERROR',
