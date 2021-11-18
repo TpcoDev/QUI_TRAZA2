@@ -8,9 +8,6 @@
             <field eval="12" name="priority" />
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='barcode']" position="before">
-                    <field name="envase_id"/>
-                    <field name="embalaje_id"/>
-                    <field name="unidad_logistica_id"/>
                     <field name='as_contenido_envase' />
                     <field name='as_cantidad_envase' />
                     <field name='as_cantidad_unidades' />
@@ -19,9 +16,7 @@
                     <field name='as_type_product' widget="radio"  options="{'horizontal': true}"/>
                 </xpath>
 
-                <xpath expr="//field[@name='uom_po_id']" position="before">
-                    <field name='unidad_referencia' options="{'no_create': True}"/>
-                </xpath>
+
             </field>
         </record>
       

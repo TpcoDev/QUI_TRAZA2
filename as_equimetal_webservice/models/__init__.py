@@ -5,3 +5,5 @@ from . import as_stock_picking_type
 from . import as_sale_order
 from . import as_purchase_order
 from . import as_stock_production_lot
+from . import as_modelos_x
+from . import uom

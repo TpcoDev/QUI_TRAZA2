@@ -23,7 +23,12 @@ class StockQuant(models.Model):
         for record in self:
             record.cant = record.inventory_quantity / record.product_uom_id.factor
 
-    @api.depends('product_id')
+    # def compute_unit(self):
+    #     for record in self:
+    #         record.unit_ref = record.product_id.product_tmpl_id.unidad_referencia.name
+
     def compute_unit(self):
+        uom_all= self.env['uom.uom'].search([])
         for record in self:
-            record.unit_ref = record.product_id.product_tmpl_id.unidad_referencia.name
+            oum_obj=uom_all.filtered(lambda uo: uo.category_id.id==record.product_uom_id.category_id.id and uo.uom_type=="reference")
+            record.unit_ref=oum_obj.name

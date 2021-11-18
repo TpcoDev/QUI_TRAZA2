@@ -10,10 +10,124 @@ import sys
 import uuid
 import yaml
 import logging
+
 _logger = logging.getLogger(__name__)
 
 from werkzeug import urls
 from werkzeug.wsgi import wrap_file
+
+esquema_ws001 = {
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "title": "The root schema",
+    "description": "The root schema comprises the entire JSON document.",
+    "default": {},
+    "examples": [
+        {
+            "jsonrpc": "2.0",
+            "method": "ws001",
+            "params": {
+                "DocNum": "1234",
+                "DocDate": "2021-02-23T18:25:43",
+                "CardCode": "5678",
+                "CardName": "Nombre Proveedor SAP",
+                "WarehouseCode": "01",
+                "DatosProdOC": [
+                    {
+                        "LineNum": 1,
+                        "ItemCode": "91011",
+                        "ItemDescription": "Nombre de Producto SAP 01",
+                        "Quantity": 1.0,
+                        "MeasureUnit": "Kg"
+                    }
+                ]
+            },
+            "id": 1
+        }
+    ],
+    "required": [],
+    "properties": {
+        "jsonrpc": {"type": "string"},
+        "method": {"type": "string"},
+        "params": {"type": "object",
+                   "title": "The params schema",
+                   "description": "An explanation about the purpose of this instance.",
+                   "default": {},
+                   "examples": [
+                       {
+                           "DocNum": "1234",
+                           "DocDate": "2021-02-23T18:25:43",
+                           "CardCode": "5678",
+                           "CardName": "Nombre Proveedor SAP",
+                           "WarehouseCode": "01",
+                           "DatosProdOC": [
+                               {
+                                   "LineNum": 1,
+                                   "ItemCode": "91011",
+                                   "ItemDescription": "Nombre de Producto SAP 01",
+                                   "Quantity": 1.0,
+                                   "MeasureUnit": "Kg"
+                               }
+                           ]
+                       }
+                   ],
+                   "required": [],
+                   "properties": {
+                       "DocNum": {"type": "string"},
+                       "DocDate": {"type": "string"},
+                       "CardCode": {"type": "string"},
+                       "CardName": {"type": "string"},
+                       "WarehouseCode": {"type": "string"},
+                       "DatosProdOC": {
+                           "$id": "#/properties/params/properties/DatosProdOC",
+                           "type": "array",
+                           "title": "The DatosProdOC schema",
+                           "description": "An explanation about the purpose of this instance.",
+                           "default": [],
+                           "examples": [
+                               [
+                                   {
+                                       "LineNum": 1,
+                                       "ItemCode": "91011",
+                                       "ItemDescription": "Nombre de Producto SAP 01",
+                                       "Quantity": 1.0,
+                                       "MeasureUnit": "Kg"
+                                   }
+                               ]
+                           ],
+                           "items": {
+                               "$id": "#/properties/params/properties/DatosProdOC/items",
+                               "type": "object",
+                               "title": "The items schema",
+                               "description": "An explanation about the purpose of this instance.",
+                               "default": {},
+                               "examples": [
+                                   [
+                                       {
+                                           "LineNum": 1,
+                                           "ItemCode": "91011",
+                                           "ItemDescription": "Nombre de Producto SAP 01",
+                                           "Quantity": 1.0,
+                                           "MeasureUnit": "Kg"
+                                       }
+                                   ]
+                               ],
+                               "required": ["LineNum", "ItemCode", "ItemDescription", "Quantity", "MeasureUnit"],
+                               "properties": {
+                                   "LineNum": 1,
+                                   "ItemCode": {"type": "string"},
+                                   "ItemDescription": {"type": "string"},
+                                   "Quantity": {"type": "number"},
+                                   "MeasureUnit": {"type": "string"}
+                               }
+                           }
+                       }
+                   }
+                   },
+        "id": {"type": "integer"}
+    }
+}
 
 esquema_ws023 = {
     "$schema": "http://json-schema.org/draft-07/schema",
@@ -341,7 +455,6 @@ esquema_ws023 = {
     }
 }
 
-
 esquema_ws001 = {
     "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "http://example.com/example.json",
@@ -449,7 +562,6 @@ esquema_ws001 = {
         "id": {"type": "integer"}
     }
 }
-
 
 esquema_ws016 = {
     "definitions": {},

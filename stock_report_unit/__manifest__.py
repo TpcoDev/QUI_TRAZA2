@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "Stock Report Units",
+    'name': "Stock Report Unit",
     'description': """
         Long description of module's purpose
     """,

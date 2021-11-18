@@ -42,6 +42,15 @@ class AsStockMoveLine(models.Model):
             rec.qty_done_base = rec.qty_done / rec.product_uom_id.factor
 
 
+class AsStockPickingType(models.Model):
+    _inherit = 'stock.picking.type'
+
+    op_dev_type = fields.Selection(
+        selection=[('DEVPROV', 'Devolución de proveedores'), ('DEVCLI', 'Devolución de clientes')],
+        string='Tipo de Operación'
+    )
+
+
 class AsStockPicking(models.Model):
     _inherit = 'stock.picking'
 
@@ -52,6 +61,8 @@ class AsStockPicking(models.Model):
             ('WS004', 'WS004'),
             ('WS006', 'WS006'),
             ('WS099', 'WS099'),
+            ('WS013', 'WS013'),
+            ('WS017', 'WS017'),
             ('WS018', 'WS018'),
             ('WS021', 'WS021'),
         ],
@@ -61,6 +72,10 @@ class AsStockPicking(models.Model):
     as_ot_sap = fields.Integer(string='OT SAP')
     as_num_factura = fields.Char(string='Num de Factura')
     as_guia_sap = fields.Char(string='Guía SAP')
+    op_dev_type = fields.Selection(
+        selection=[('DEVPROV', 'Devolución de proveedores'), ('DEVCLI', 'Devolución de clientes')],
+        string='Tipo de Operación'
+    )
     num_fact_prov = fields.Char()
 
     def button_validate(self):
@@ -434,7 +449,7 @@ class AsStockPicking(models.Model):
                             "distNumber": move_line.lot_id.name,
                             "quantity": move_line.qty_done_base,
                             "quantityOrig": move_line.qty_done,
-                            "dateProduction": str(move_line.lot_id.create_date.strftime('%Y-%m-%dT%H:%M:%S')),
+                            "dateAdmission": str(move_line.lot_id.create_date.strftime('%Y-%m-%dT%H:%M:%S')),
                         }
                         if move_line.lot_id.expiration_date:
                             vals_move_line['dateExpiration'] = str(
@@ -459,11 +474,6 @@ class AsStockPicking(models.Model):
                     }
                     picking_line.append(vals_picking_line)
             if webservice == 'WS005':
-                try:
-                    int(picking.origin)
-                except Exception as e:
-                    errores += '<b>* El origen-docNumSAP no puede tener letras solo Numeros</b><br/>'
-                    cont_errores += 1
                 if not picking.partner_id:
                     errores += '<b>* Cliente No seleccionado</b><br/>'
                     cont_errores += 1
