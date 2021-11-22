@@ -1,30 +1,19 @@
 # -*- coding: utf-8 -*-
-from odoo.tools.translate import _
-from odoo import http
+import json
+import logging
+import uuid
+
+import jsonschema
+import requests
+import yaml
+from jsonschema import validate
+
 from odoo import http
 from odoo.http import request
-from datetime import datetime
-from bs4 import BeautifulSoup
-import json
-import sys
-import uuid
-from odoo import http
-from odoo.http import request, Response
-import jsonschema
-from jsonschema import validate
-import json
-import yaml
-import requests, json
-from . import as_estructuras
-import logging
 
 _logger = logging.getLogger(__name__)
-from datetime import timedelta, datetime, date
-import calendar
-from dateutil.relativedelta import relativedelta
+from datetime import datetime
 import os.path
-from werkzeug import urls
-from werkzeug.wsgi import wrap_file
 
 address_api = {
     'WS005': '/api/Trazabilidad/ProductoRecibido',
@@ -331,51 +320,51 @@ class as_webservice_quimetal(http.Controller):
 
                                 }
                             )
-                        # request.env.cr.commit()
-                        _logger.debug("\n\n\n\n\nventa_nueva_linea: %s", venta_nueva_linea)
+                            # request.env.cr.commit()
+                            _logger.debug("\n\n\n\n\nventa_nueva_linea: %s", venta_nueva_linea)
 
-                        # Ensamblando la venta
-                        venta_nueva = {
-                            'name': post['DocNum'],
-                            'origin': post['DocNum'],
-                            'as_num_comex': post['NumAtcard'],
-                            # 'priority': '0', 
-                            'partner_id': cliente_id,
-                            # 'partner_ref': False, 
-                            'currency_id': 2,
-                            'date_order': date_approve,
-                            'user_id': uid,
-                            'company_id': 1,
-                            'payment_term_id': 7,
-                            "fiscal_position_id": False,
-                            "analytic_account_id": False,
-                            "warehouse_id": 1,
-                            "incoterm": False,
-                            "picking_policy": "direct",
-                            "commitment_date": False,
-                            "campaign_id": False,
-                            "medium_id": False,
-                            "source_id": False,
-                            "signed_by": False,
-                            "signed_on": False,
-                            "signature": False,
-                            "note": "",
-                            "team_id": 1,
-                            "require_signature": True,
-                            "require_payment": True,
-                            "client_order_ref": False,
-                            "show_update_pricelist": False,
-                            "pricelist_id": 1,
-                            "partner_invoice_id": cliente_id,
-                            "partner_shipping_id": cliente_id,
-                            "sale_order_template_id": False,
-                            "validity_date": False,
-                            'order_line': [(0, False, line) for line in venta_nueva_linea],
-                        }
+                            # Ensamblando la venta
+                            venta_nueva = {
+                                'name': f"{post['DocNum'] - linea['LineNum']}",
+                                'origin': post['DocNum'],
+                                'as_num_comex': post['NumAtcard'],
+                                # 'priority': '0',
+                                'partner_id': cliente_id,
+                                # 'partner_ref': False,
+                                'currency_id': 2,
+                                'date_order': date_approve,
+                                'user_id': uid,
+                                'company_id': 1,
+                                'payment_term_id': 7,
+                                "fiscal_position_id": False,
+                                "analytic_account_id": False,
+                                "warehouse_id": 1,
+                                "incoterm": False,
+                                "picking_policy": "direct",
+                                "commitment_date": False,
+                                "campaign_id": False,
+                                "medium_id": False,
+                                "source_id": False,
+                                "signed_by": False,
+                                "signed_on": False,
+                                "signature": False,
+                                "note": "",
+                                "team_id": 1,
+                                "require_signature": True,
+                                "require_payment": True,
+                                "client_order_ref": False,
+                                "show_update_pricelist": False,
+                                "pricelist_id": 1,
+                                "partner_invoice_id": cliente_id,
+                                "partner_shipping_id": cliente_id,
+                                "sale_order_template_id": False,
+                                "validity_date": False,
+                                'order_line': [(0, False, line) for line in venta_nueva_linea],
+                            }
 
-                        nueva_venta = request.env['sale.order'].sudo().create(venta_nueva)
-                        nueva_venta.action_confirm()
-                        self.create_message_log("ws016", as_token, post, 'ACEPTADO', 'OC recibidas correctamente')
+                            nueva_venta = request.env['sale.order'].sudo().create(venta_nueva)
+                            nueva_venta.action_confirm()
+                            self.create_message_log("ws016", as_token, post, 'ACEPTADO', 'OC recibidas correctamente')
                         return mensaje_correcto
                     else:
                         self.create_message_log("ws016", as_token, post, 'RECHAZADO',

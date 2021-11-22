@@ -14,8 +14,7 @@
     
     # always loaded
     'data': [
-        'views/stock_barcode_templates.xml',
-        #'views/templates.xml',
+        'views/assets.xml',
     ],
 
     'qweb': [
