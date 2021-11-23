@@ -2,7 +2,7 @@
 {
     'name': "Stock Barcode Quimetal",
     'summary': "Use barcode scanners to process logistics operations",
-    
+
     'description': """
         
     """,
@@ -11,10 +11,11 @@
     'category': 'Inventory/Inventory',
     'version': '1.0',
     'depends': ['stock_barcode'],
-    
+
     # always loaded
     'data': [
         'views/assets.xml',
+        'views/product_views.xml',
     ],
 
     'qweb': [

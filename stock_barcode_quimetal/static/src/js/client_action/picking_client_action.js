@@ -1,19 +1,25 @@
-odoo.define('stock_barcode_quimetal.ClientAction', function (require) {
+odoo.define('stock_barcode.QuimetalClientAction', function (require) {
     'use strict';
 
-    var core = require('web.core');
-    var ClientAction = require('stock_barcode.ClientAction');
+    var PickingClientAction = require('stock_barcode.picking_client_action');
     var ViewsWidget = require('stock_barcode.ViewsWidget');
 
-    var _t = core._t;
-
-    var QuimetalClientAction = ClientAction.include({
-        custom_events: _.extend({}, ClientAction.prototype.custom_events, {
+    var QuimetalClientAction = PickingClientAction.include({
+        custom_events: _.extend({}, PickingClientAction.prototype.custom_events, {
             'print_line': '_onPrintLine',
         }),
-        init: function (parent, action) {
-            this._super.apply(this, arguments);
-            console.log("Entrando a QuimetalClientAction");
+        /**
+         * @override
+         */
+        _instantiateViewsWidget: function (defaultValues, params) {
+            debugger;
+            return new ViewsWidget(
+                this,
+                'product.template',
+                'stock_barcode_quimetal.barcode_quimetal_product',
+                defaultValues,
+                params
+            );
         },
         /**
          * Handles the `edit_product` OdooEvent. It destroys `this.linesWidget` and displays an instance
@@ -27,7 +33,7 @@ odoo.define('stock_barcode_quimetal.ClientAction', function (require) {
          * @param {OdooEvent} ev
          */
         _onPrintLine: function (ev) {
-            console.log("onPrintLine");
+            debugger;
 
             ev.stopPropagation();
             this.linesWidgetState = this.linesWidget.getState();
@@ -38,6 +44,7 @@ odoo.define('stock_barcode_quimetal.ClientAction', function (require) {
             // of the `applyChanges` RPC.
             var virtual_id = _.isString(ev.data.id) ? ev.data.id : false;
 
+            var self = this;
             var self = this;
             this.mutex.exec(function () {
                 return self._save().then(function () {
@@ -55,9 +62,10 @@ odoo.define('stock_barcode_quimetal.ClientAction', function (require) {
                 });
             });
         },
+
+
     });
 
-    core.action_registry.add('stock_barcode_quimetal_client_action', QuimetalClientAction);
     return QuimetalClientAction;
 
 });
