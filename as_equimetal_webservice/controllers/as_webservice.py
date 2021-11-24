@@ -1072,13 +1072,13 @@ class as_webservice_quimetal(http.Controller):
         mensaje_correcto = {
             "Token": as_token,
             "RespCode": 0,
-            "RespMessage": "Producto se agregó correctamente"
+            "RespMessage": "Devolución se realizó correctamente"
         }
 
         try:
             myapikey = request.httprequest.headers.get("Authorization")
             if not myapikey:
-                self.create_message_log("WS017", as_token, post, 'RECHAZADO', 'API KEY no existe')
+                self.create_message_log("WS013", as_token, post, 'RECHAZADO', 'API KEY no existe')
                 return mensaje_error
             user_id = request.env["res.users.apikeys"]._check_credentials(scope="rpc", key=myapikey)
             request.uid = user_id
@@ -1089,7 +1089,7 @@ class as_webservice_quimetal(http.Controller):
                 # es_valido = True
                 es_valido = self.validar_json(post, esquema=estructura)
                 if es_valido:
-                    op_dev_type = post['params']['OpDevType']
+                    op_dev_type = post['params']['ObjType']
                     picking_type = request.env['stock.picking.type'].sudo().search(
                         [('sequence_code', '=', op_dev_type)],
                         limit=1)
@@ -1099,9 +1099,9 @@ class as_webservice_quimetal(http.Controller):
                         [('usage', '=', 'internal'), ('name', '=', post['params']['WarehouseCodeDestination'])],
                         limit=1)
 
-                    if op_dev_type == 'DEVPROV' and not location_dest_id:
+                    if op_dev_type == 21 and not location_dest_id:
                         location_dest_id = request.env.ref('stock.stock_location_suppliers')
-                    elif op_dev_type == 'DEVCLI' and not location_id:
+                    elif op_dev_type == 16 and not location_id:
                         location_id = request.env.ref('stock.stock_location_customers')
 
                     partner = request.env['res.partner'].sudo().search([('vat', '=', post['params']['CardCode'])],
@@ -1149,14 +1149,14 @@ class as_webservice_quimetal(http.Controller):
 
                     picking = request.env['stock.picking'].create(vals)
                     if picking:
-                        mensaje_correcto['RespMessage'] = 'Transferencia creada'
+                        mensaje_correcto['RespMessage'] = 'Devolución creada'
                         self.create_message_log("WS013", as_token, mensaje_correcto, 'ACEPTADO',
-                                                'Transferencia creada')
+                                                'Devolución creada')
                         picking.button_validate()
                     else:
-                        mensaje_correcto['RespMessage'] = 'Transferencia no creada'
+                        mensaje_correcto['RespMessage'] = 'Devolución no creada'
                         self.create_message_log("WS013", as_token, mensaje_correcto, 'ERROR',
-                                                'Transferencia no creada')
+                                                'Devolución no creada')
                     return mensaje_correcto
                 else:
                     self.create_message_log("WS013", as_token, post, 'RECHAZADO', 'Estructura del Json Invalida')
