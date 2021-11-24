@@ -39,6 +39,8 @@
                     <field name="picking_type_use_existing_lots" invisible="1"/>
                     <field name="picking_location_id" invisible="1"/>
                     <field name="picking_location_dest_id" invisible="1"/>
+                    <field name="qty_done" invisible="1"/>
+
                     <div class="row" groups="stock.group_production_lot">
                         <div class="col-12 col-md-6 my-2 d-flex align-items-baseline">
                             <i class="fa fa-fw fa-lg fa-barcode mr-3" title="Serial/Lot Number"
@@ -57,10 +59,20 @@
                             <field name="quimetal_lines_ids">
                                 <tree editable="bottom">
                                     <field name="num_bultos"/>
-                                    <field name="cant_envases" sum="Cantidad de Envases Total"/>
-                                    <field name="peso_envase" sum="Peso/Envase Total"/>
+                                    <field name="cant_envases"/>
+                                    <field name="peso_envase"/>
                                 </tree>
                             </field>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-md-8 col-sm-12 d-flex justify-content-end">
+                            <i class="fa fa-fw fa-lg fa-cube mr-3" title="Total Cantidad Envase"/>
+                            <field name="total_cant_envases" options="{'type': 'number'}"/>
+                        </div>
+                        <div class="col-12 col-md-4 col-sm-12 d-flex justify-content-end">
+                            <i class="fa fa-fw fa-lg fa-cube mr-3" title="Total de Peso/Envase"/>
+                            <field name="total_peso_envase" options="{'type': 'number'}"/>
                         </div>
                     </div>
 
