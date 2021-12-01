@@ -20,6 +20,7 @@ Custom module for Latproject
     ],
     'website': 'http://www.ahorasoft.com',
     'data': [
+        # 'data/data.xml',
         'security/ir.model.access.csv',
         'views/as_mesage_log.xml',
         'views/as_stock_picking.xml',

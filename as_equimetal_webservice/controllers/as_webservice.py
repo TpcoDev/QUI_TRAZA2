@@ -1208,7 +1208,7 @@ class as_webservice_quimetal(http.Controller):
                 if es_valido:
                     doc_type = post['params']['DocType']
                     model = 'purchase.order' if doc_type == 'OC' else 'sale.order'
-                    object_model = request.env[model].search([('name', '=', post['params']['DocNum'])], limit=1)
+                    object_model = request.env[model].search([('name', 'like', post['params']['DocNum'])])
                     if object_model:
                         object_model.write({
                             'f_closed': False if post['params']['flagClosed'] else True
