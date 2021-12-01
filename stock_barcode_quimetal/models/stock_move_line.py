@@ -94,12 +94,6 @@ class StockMoveLine(models.Model):
                 bytes = base64.b64decode(b64_pdf, validate=True)
                 name = "Etiquetas"
                 filename = name + f'.{pdf[1]}'
-                save_path = '/home/adruban/'
-                completeName = os.path.join(save_path, filename)
-                print(completeName)
-                file1 = open(completeName, "wb")
-                file1.write(bytes)
-                file1.close()
 
                 host_name = self.env["ir.config_parameter"].sudo().get_param("host_name")
                 shared_folder = self.env["ir.config_parameter"].sudo().get_param("shared_folder")
