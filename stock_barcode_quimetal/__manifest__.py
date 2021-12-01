@@ -18,6 +18,10 @@
         'security/ir.model.access.csv',
         'views/assets.xml',
         'views/barcode_move_line_views.xml',
+        'views/res_config_settings.xml',
+        'report/as_reporte_mp.xml',
+        'report/as_reporte_pp.xml',
+        'views/as_format_report.xml'
     ],
 
     'qweb': [

@@ -1,5 +1,8 @@
 import base64
 import logging
+import os
+import shutil
+import tempfile
 from io import BytesIO
 
 import barcode
@@ -49,20 +52,13 @@ class StockMoveLine(models.Model):
         context = self._context
         datas = {'ids': context.get('active_ids', [])}
         tipos = 1 if self.product_id.as_type_product == 'MP' else 0
-        as_cantidades = 67
-
-        calculo = datos_producto.as_contenido_envase * datos_producto.as_cantidad_envase * datos_producto.as_cantidad_unidades
-        kg_compra = move.qty_done
-        if calculo > 0:
-            total = kg_compra / calculo
-        else:
-            total = kg_compra
-        total = math.ceil(total)
-
 
         datas['model'] = 'as.wizard.formulas'
         datas['form'] = self.read()[0]
         diccionario = []
+        oum_obj = self.env['uom.uom'].search([]).filtered(
+            lambda uo: uo.category_id.id == self.product_uom_id.category_id.id and uo.uom_type == "reference")
+
         # tipo 1 move
         if tipos == 1:
             file_like_object = BytesIO()
@@ -70,20 +66,48 @@ class StockMoveLine(models.Model):
             ean = EAN(self.as_barcode_mpp_1_CDB(), writer=ImageWriter())
             ean.write(file_like_object, options={"write_text": False})
             self.as_imge = base64.b64encode(file_like_object.getvalue())
-            for i in range(0, as_cantidades):
-                diccionario.append(self.id)
-            if diccionario == []:
-                raise UserError("Debe guardar el formulario para generar reporte")
-            return self.env.ref('as_stock_equimetal.as_reporte_2').report_action(diccionario)
-        else:
-            file_like_object = BytesIO()
-            EAN = barcode.get_barcode_class('code128')
-            ean = EAN(self.as_barcode_pp_1_CDB(), writer=ImageWriter())
-            ean.write(file_like_object, options={"write_text": False})
-            self.as_imge = base64.b64encode(file_like_object.getvalue())
-            for i in range(0, as_cantidades):
-                diccionario.append(self.id)
+
+            for idx, line in enumerate(self.quimetal_lines_ids):
+                for item in range(0, line.num_bultos):
+                    diccionario.append({
+                        'cant': line.cant_envases,
+                        'weight': line.peso_envase * line.cant_envases,
+                        'uom_reference': oum_obj.name,
+                    })
+
+            datas = {
+                'data': diccionario,
+            }
 
             if diccionario == []:
                 raise UserError("Debe guardar el formulario para generar reporte")
-            return self.env.ref('as_stock_equimetal.as_reportes_etiquetas_pdf').report_action(diccionario)
+
+            pdf = None
+            if tipos == 1:
+                pdf = self.env.ref('stock_barcode_quimetal.as_reportes_etiquetas_mp')._render_qweb_pdf([self.id],
+                                                                                                       data=datas)
+            else:
+                pdf = self.env.ref('stock_barcode_quimetal.as_reportes_etiquetas_pp')._render_qweb_pdf([self.id],
+                                                                                                       data=datas)
+            if pdf:
+                b64_pdf = base64.b64encode(pdf[0])
+                bytes = base64.b64decode(b64_pdf, validate=True)
+                name = "Etiquetas"
+                filename = name + f'.{pdf[1]}'
+                save_path = '/home/adruban/'
+                completeName = os.path.join(save_path, filename)
+                print(completeName)
+                file1 = open(completeName, "wb")
+                file1.write(bytes)
+                file1.close()
+
+                host_name = self.env["ir.config_parameter"].sudo().get_param("host_name")
+                shared_folder = self.env["ir.config_parameter"].sudo().get_param("shared_folder")
+                source_path = f"\\{host_name}{shared_folder}{filename}"
+
+                with tempfile.NamedTemporaryFile(mode='w+b', delete=False) as t:
+                    t.write(bytes)
+                    dir_name = t.name
+                    t.close()
+                    shutil.copyfile(dir_name, source_path)
+                    os.remove(dir_name)
