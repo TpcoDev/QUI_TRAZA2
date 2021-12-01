@@ -205,7 +205,8 @@ class as_webservice_quimetal(http.Controller):
     # WS016, de SAP a ODOO
     @http.route(['/tpco/odoo/ws016', ], auth="public", type="json", method=['POST'], csrf=False)
     def WS016(self, **post):
-        post = yaml.load(request.httprequest.data)
+        # post = yaml.load(request.httprequest.data)
+        post = json.loads(request.httprequest.data)
         res = {}
         as_token = uuid.uuid4().hex
         mensaje_error = {
@@ -310,7 +311,7 @@ class as_webservice_quimetal(http.Controller):
                                     'name': linea["ItemDescription"],
                                     # 'account_analytic_id': False,
                                     'product_uom': producto_uom_id,
-                                    'f_closed': 0,
+
                                     "price_unit": 1,
                                     "route_id": False,
                                     "customer_lead": 0,
@@ -325,12 +326,13 @@ class as_webservice_quimetal(http.Controller):
 
                             # Ensamblando la venta
                             venta_nueva = {
-                                'name': f"{post['DocNum'] - linea['LineNum']}",
+                                'name': f"{post['DocNum']} - {linea['LineNum']}",
                                 'origin': post['DocNum'],
                                 'as_num_comex': post['NumAtcard'],
                                 # 'priority': '0',
                                 'partner_id': cliente_id,
                                 # 'partner_ref': False,
+                                'f_closed': 0,
                                 'currency_id': 2,
                                 'date_order': date_approve,
                                 'user_id': uid,
