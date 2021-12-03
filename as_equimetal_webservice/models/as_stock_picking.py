@@ -465,7 +465,7 @@ class AsStockPicking(models.Model):
                         "quantity": as_total,
                         "quantityOrig": move_stock.qtyOrigin,
                         "lineNum": picking.origin.split('-')[1] if len(picking.origin.split('-')) > 1 else '',
-                        "measureUnitOrig": move_stock.product_id.uom_orig_id,
+                        "measureUnitOrig": '' if not move_stock.product_id.uom_orig_id else move_stock.product_id.uom_orig_id.name,
                         "measureUnit": move_stock.product_uom.name,
                         "lote": move,
                     }
