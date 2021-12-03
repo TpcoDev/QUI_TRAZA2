@@ -1101,7 +1101,7 @@ class as_webservice_quimetal(http.Controller):
                 if es_valido:
                     op_dev_type = post['params']['ObjType']
                     picking_type = request.env['stock.picking.type'].sudo().search(
-                        [('sequence_code', '=', op_dev_type)],
+                        [('op_dev_type', '=', op_dev_type)],
                         limit=1)
                     location_id = request.env['stock.location'].sudo().search(
                         [('usage', '=', 'internal'), ('name', '=', post['params']['WarehouseCodeOrigin'])], limit=1)
