@@ -45,7 +45,7 @@ class AsStockMoveLine(models.Model):
 class AsStockPickingType(models.Model):
     _inherit = 'stock.picking.type'
 
-    op_dev_type = fields.Selection(
+    opdevtype = fields.Selection(
         selection=[('21', 'Devolución de proveedores'), ('16', 'Devolución de clientes')],
         string='Tipo de Operación'
     )
@@ -72,7 +72,7 @@ class AsStockPicking(models.Model):
     as_ot_sap = fields.Integer(string='OT SAP')
     as_num_factura = fields.Char(string='Num de Factura')
     as_guia_sap = fields.Char(string='Guía SAP')
-    op_dev_type = fields.Integer()
+    opdevtype = fields.Integer()
     num_fact_prov = fields.Char()
 
     def button_validate(self):

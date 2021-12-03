@@ -1101,7 +1101,7 @@ class as_webservice_quimetal(http.Controller):
                 if es_valido:
                     op_dev_type = post['params']['ObjType']
                     picking_type = request.env['stock.picking.type'].sudo().search(
-                        [('op_dev_type', '=', op_dev_type)],
+                        [('opdevtype', '=', op_dev_type)],
                         limit=1)
                     location_id = request.env['stock.location'].sudo().search(
                         [('usage', '=', 'internal'), ('name', '=', post['params']['WarehouseCodeOrigin'])], limit=1)
@@ -1150,7 +1150,7 @@ class as_webservice_quimetal(http.Controller):
                         'as_ot_sap': post['params']['DocNumSap'],
                         'picking_type_id': picking_type.id,
                         'date': date,
-                        'op_dev_type': op_dev_type,
+                        'opdevtype': op_dev_type,
                         'partner_id': partner.id if partner else False,
                         'location_id': location_id.id if location_id else False,
                         'location_dest_id': location_dest_id.id if location_dest_id else False,
