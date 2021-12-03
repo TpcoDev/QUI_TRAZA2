@@ -485,7 +485,7 @@ class AsStockPicking(models.Model):
                         "docNum": str(picking.name),
                         "docDate": str(picking.date_done.strftime('%Y-%m-%dT%H:%M:%S') or None),
                         "docNumSAP": picking.origin.split('-')[0],
-                        "numFactProv": picking.num_fact_prov,
+                        "numFactProv": '' if not picking.num_fact_prov else picking.num_fact_prov,
                         "warehouseCodeOrigin": location_id,
                         "warehouseCodeDestination": location_dest_id,
                         "cardCode": picking.partner_id.vat,
