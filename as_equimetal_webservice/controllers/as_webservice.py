@@ -1162,6 +1162,7 @@ class as_webservice_quimetal(http.Controller):
                         mensaje_correcto['RespMessage'] = 'Devolución creada'
                         self.create_message_log("WS013", as_token, mensaje_correcto, 'ACEPTADO',
                                                 'Devolución creada')
+                        picking.action_confirm()
                         picking.button_validate()
                     else:
                         mensaje_correcto['RespMessage'] = 'Devolución no creada'

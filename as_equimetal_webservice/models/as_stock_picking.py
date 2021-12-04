@@ -74,6 +74,8 @@ class AsStockPicking(models.Model):
     as_guia_sap = fields.Char(string='Guía SAP')
     opdevtype = fields.Integer()
     num_fact_prov = fields.Char()
+    num_guia_prov = fields.Char()
+    f_closed = fields.Integer(related='purchase_id.f_closed', store=True)
 
     def button_validate(self):
         res = super().button_validate()
@@ -486,6 +488,7 @@ class AsStockPicking(models.Model):
                         "docDate": str(picking.date_done.strftime('%Y-%m-%dT%H:%M:%S') or None),
                         "docNumSAP": picking.origin.split('-')[0],
                         "numFactProv": '' if not picking.num_fact_prov else picking.num_fact_prov,
+                        "numGuiaProv": '' if not picking.num_guia_prov else picking.num_guia_prov,
                         "warehouseCodeOrigin": location_id,
                         "warehouseCodeDestination": location_dest_id,
                         "cardCode": picking.partner_id.vat,

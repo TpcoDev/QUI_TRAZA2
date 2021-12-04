@@ -14,7 +14,7 @@ odoo.define('as_equimetal_webservice.extension_name', function (require) {
     FormController.include({
         updateButtons: function () {
             this._super.apply(this, arguments)
-            if (this.modelName === 'purchase.order' || this.modelName === 'sale.order') {
+            if (this.modelName === 'purchase.order' || this.modelName === 'sale.order' || this.modelName === 'stock.picking') {
                 const record = this.model.get(this.handle, {raw: false});
                 if (record.data.f_closed === 1) {
                     this.$buttons.find('.o_form_button_edit').hide();
